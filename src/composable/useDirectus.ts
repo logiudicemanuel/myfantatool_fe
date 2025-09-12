@@ -22,7 +22,27 @@ export async function getSquadre() {
   const res = await api.get('/items/squadre');
   return res.data.data;
 }
+export async function savePlayer(data:object) {
+  if (!loggedIn.value) throw new Error('Non sei loggato');
+  const res = await api.post('/items/giocatore', data);
+  return res.data.data;
+}
+export async function getGiocatoriTitolari(sq: number) {
+  if (!loggedIn.value) throw new Error('Non sei loggato');
+  const res = await api.get(`/items/giocatore?filter[squadra][_eq]=${sq}&filter[impiego][_eq]=tit`);
+  return res.data.data;
+}
+export async function getGiocatoriBallottaggio(sq: number) {
+  if (!loggedIn.value) throw new Error('Non sei loggato');
+  const res = await api.get(`/items/giocatore?filter[squadra][_eq]=${sq}&filter[impiego][_eq]=bal`);
+  return res.data.data;
+}
+export async function deleteGiocatore(id: number) {
+  if (!loggedIn.value) throw new Error('Non sei loggato');
+  const res = await api.delete(`/items/giocatore/${id}`);
+  return res.data.data;
+}
 
 export default function useDirectus() {
-  return { login, getSquadre, token, loggedIn };
+  return { login, getSquadre, savePlayer, getGiocatoriTitolari, getGiocatoriBallottaggio, deleteGiocatore, token, loggedIn };
 }
