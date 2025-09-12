@@ -84,11 +84,11 @@ onMounted(async () =>{
 
 <template>
   <div class="w-full h-[calc(100%-60px)] flex items-center justify-center text-gray-700">
-    <div class="shadow-lg bg-white rounded-lg w-[90%] h-[90%] flex flex-col items-center">
+    <div class="shadow-lg bg-gradient-to-r from-white/0 to-white/5 backdrop-blur rounded-lg w-[90%] h-[90%] flex flex-col items-center">
       <h1 class="text-[32px] flex items-center justify-center pt-[10px] font-bold">SQUADRE SERIE A</h1>
       <p class="text-center italic text-gray-500 h-[40px] leading-5">Per ogni squadra puoi gestire i titolari e i ballottaggi.<br> Inoltre per ogni giocatore hai la possibilita' di inserire delle fantastatische utili da consultare durante l'asta.</p>
       <div v-if="!Object.keys(ts).length" class="gap-4 flex-wrap pt-[70px] flex items-center justify-center">
-        <div class="border border-gray-400 w-[300px] h-[80px] rounded p-[10px] flex items-center hover:h-[90px] hover:w-[310px] hover:m-[-5px] cursor-pointer" v-for="sq in squadre" :key="sq.id" @click="teamSelect(sq)">
+        <div class="border border-gray-400 w-[300px] h-[80px] rounded p-[10px] flex items-center hover:h-[90px] hover:w-[310px] hover:m-[-5px] cursor-pointer bg-white" v-for="sq in squadre" :key="sq.id" @click="teamSelect(sq)">
           <img alt="logo" :src="sq.stemma" :height="sizeMapping.find(x => x.name === sq.nome) ? sizeMapping.find(x => x.name === sq.nome)?.size : 35" :width="sizeMapping.find(x => x.name === sq.nome) ? sizeMapping.find(x => x.name === sq.nome)?.size : 35" class="mx-[30px]"/>
           <p class="font-semibold text-[22px]">{{ sq.nome }}</p>
         </div>
@@ -99,7 +99,7 @@ onMounted(async () =>{
           {{ts.nome}}
         </p>
         <div class="flex items-center justify-center gap-4 w-full h-full">
-          <div class="w-[25%] min-w-[300px] h-[calc(100%-50px)] border rounded-lg border-gray-300 flex flex-col items-center">
+          <div class="w-[25%] min-w-[300px] h-[calc(100%-50px)] border rounded-lg border-gray-300 flex flex-col items-center bg-white">
             <div class="flex items-center">
               <p class="text-center pt-[5px] text-[18px] font-semibold mr-[5px]">TITOLARI</p>
               <el-button type="success" size="small" :disabled="playerTit.length > 2" circle class="mt-[3px]" @click="openModal('tit', ts.id)">
@@ -118,7 +118,7 @@ onMounted(async () =>{
               </div>
             </div>
           </div>
-          <div class="w-[25%] min-w-[300px] h-[calc(100%-50px)] border rounded-lg border-gray-300 flex flex-col items-center">
+          <div class="w-[25%] min-w-[300px] h-[calc(100%-50px)] border rounded-lg border-gray-300 flex flex-col items-center bg-white">
             <div class="flex items-center">
               <p class="text-center pt-[5px] text-[18px] font-semibold mr-[5px]">BALLOTTAGGI</p>
               <el-button type="warning" size="small" circle class="mt-[3px]" @click="openModal('bal', ts.id)">
