@@ -74,6 +74,7 @@ function getColor(ruolo: string){
 async function deletePlayer(id: number){
   await deleteGiocatore(id)
   await loadTitPlayer(ts.value.id)
+  await loadBalPlayer(ts.value.id)
 }
 
 onMounted(async () =>{
