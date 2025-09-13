@@ -83,62 +83,64 @@ onMounted(async () =>{
 </script>
 
 <template>
-  <div class="w-full h-[calc(100%-60px)] flex items-center justify-center text-gray-700">
+  <div class="w-full h-[calc(100%-60px)] flex items-center justify-center text-gray-700 !overflow-x-hidden">
     <div class="shadow-lg bg-gradient-to-r from-white/0 to-white/5 backdrop-blur rounded-lg w-[90%] h-[90%] flex flex-col items-center">
       <h1 class="text-[32px] flex items-center justify-center pt-[10px] font-bold">SQUADRE SERIE A</h1>
       <p class="text-center italic text-gray-500 h-[40px] leading-5">Per ogni squadra puoi gestire i titolari e i ballottaggi.<br> Inoltre per ogni giocatore hai la possibilita' di inserire delle fantastatische utili da consultare durante l'asta.</p>
-      <div v-if="!Object.keys(ts).length" class="gap-4 flex-wrap pt-[70px] flex items-center justify-center">
-        <div class="border border-gray-400 w-[300px] h-[80px] rounded p-[10px] flex items-center hover:h-[90px] hover:w-[310px] hover:m-[-5px] cursor-pointer bg-white" v-for="sq in squadre" :key="sq.id" @click="teamSelect(sq)">
-          <img alt="logo" :src="sq.stemma" :height="sizeMapping.find(x => x.name === sq.nome) ? sizeMapping.find(x => x.name === sq.nome)?.size : 35" :width="sizeMapping.find(x => x.name === sq.nome) ? sizeMapping.find(x => x.name === sq.nome)?.size : 35" class="mx-[30px]"/>
-          <p class="font-semibold text-[22px]">{{ sq.nome }}</p>
+      <Transition name="fade-slide" mode="out-in">
+        <div v-if="!Object.keys(ts).length" class="gap-4 flex-wrap pt-[70px] flex items-center justify-center">
+          <div class="border border-gray-400 w-[300px] h-[80px] rounded p-[10px] flex items-center hover:h-[90px] hover:w-[310px] hover:m-[-5px] cursor-pointer bg-white" v-for="sq in squadre" :key="sq.id" @click="teamSelect(sq)">
+            <img alt="logo" :src="sq.stemma" :height="sizeMapping.find(x => x.name === sq.nome) ? sizeMapping.find(x => x.name === sq.nome)?.size : 35" :width="sizeMapping.find(x => x.name === sq.nome) ? sizeMapping.find(x => x.name === sq.nome)?.size : 35" class="mx-[30px]"/>
+            <p class="font-semibold text-[22px]">{{ sq.nome }}</p>
+          </div>
         </div>
-      </div>
-      <div v-else class="flex flex-col items-center justify-center pt-[20px] w-full h-full">
-        <p class="text-[26px] font-semibold text-gray-700 flex items-center">
-          <Icon icon="mdi:arrow-back-circle" width="30" height="30" class="mr-[5px] cursor-pointer" @click="ts = {}"/>
-          {{ts.nome}}
-        </p>
-        <div class="flex items-center justify-center gap-4 w-full h-full">
-          <div class="w-[25%] min-w-[300px] h-[calc(100%-50px)] border rounded-lg border-gray-300 flex flex-col items-center bg-white">
-            <div class="flex items-center">
-              <p class="text-center pt-[5px] text-[18px] font-semibold mr-[5px]">TITOLARI</p>
-              <el-button type="success" size="small" :disabled="playerTit.length > 2" circle class="mt-[3px]" @click="openModal('tit', ts.id)">
-                <Icon icon="mdi:plus" height="18"></Icon>
-              </el-button>
-            </div>
-            <div class="flex items-center justify-between rounded border border-gray-200 gap-4 w-[95%] mx-2 mt-2 px-2" v-for="player in playerTit" :key="player.id">
+        <div v-else class="flex flex-col items-center justify-center pt-[20px] w-full h-full">
+          <p class="text-[26px] font-semibold text-gray-700 flex items-center">
+            <Icon icon="mdi:arrow-back-circle" width="30" height="30" class="mr-[5px] cursor-pointer" @click="ts = {}"/>
+            {{ts.nome}}
+          </p>
+          <div class="flex items-center justify-center gap-4 w-full h-full">
+            <div class="w-[25%] min-w-[300px] h-[calc(100%-50px)] border rounded-lg border-gray-300 flex flex-col items-center bg-white">
               <div class="flex items-center">
-                <div class="h-[18px] w-[18px] rounded-full flex justify-center items-center text-[11px] text-white mr-2" :class="[getColor(player.ruolo)]">{{player.ruolo}}</div>
-                {{player.nome}}
+                <p class="text-center pt-[5px] text-[18px] font-semibold mr-[5px]">TITOLARI</p>
+                <el-button type="success" size="small" :disabled="playerTit.length > 2" circle class="mt-[3px]" @click="openModal('tit', ts.id)">
+                  <Icon icon="mdi:plus" height="18"></Icon>
+                </el-button>
               </div>
-              <div class="flex items-center text-[12px]">
-                xFMV: {{player.xFMV}}
-                xPv: {{player.xPv}}
-                <Icon icon="mdi:trash" height="15" width="15" class="ml-2 cursor-pointer" @click="deletePlayer(player.id)"></Icon>
+              <div class="flex items-center justify-between rounded border border-gray-200 gap-4 w-[95%] mx-2 mt-2 px-2" v-for="player in playerTit" :key="player.id">
+                <div class="flex items-center">
+                  <div class="h-[18px] w-[18px] rounded-full flex justify-center items-center text-[11px] text-white mr-2" :class="[getColor(player.ruolo)]">{{player.ruolo}}</div>
+                  {{player.nome}}
+                </div>
+                <div class="flex items-center text-[12px]">
+                  xFMV: {{player.xFMV}}
+                  xPv: {{player.xPv}}
+                  <Icon icon="mdi:trash" height="15" width="15" class="ml-2 cursor-pointer" @click="deletePlayer(player.id)"></Icon>
+                </div>
+              </div>
+            </div>
+            <div class="w-[25%] min-w-[300px] h-[calc(100%-50px)] border rounded-lg border-gray-300 flex flex-col items-center bg-white">
+              <div class="flex items-center">
+                <p class="text-center pt-[5px] text-[18px] font-semibold mr-[5px]">BALLOTTAGGI</p>
+                <el-button type="warning" size="small" circle class="mt-[3px]" @click="openModal('bal', ts.id)">
+                  <Icon icon="mdi:plus" height="18"></Icon>
+                </el-button>
+              </div>
+              <div class="flex items-center justify-between rounded border border-gray-200 gap-4 w-[95%] mx-2 mt-2 px-2" v-for="player in playerBal" :key="player.id">
+                <div class="flex items-center">
+                  <div class="h-[18px] w-[18px] rounded-full flex justify-center items-center text-[11px] text-white mr-2" :class="[getColor(player.ruolo)]">{{player.ruolo}}</div>
+                  {{player.nome}}
+                </div>
+                <div class="flex items-center text-[12px]">
+                  xFMV: {{player.xFMV}}
+                  xPv: {{player.xPv}}
+                  <Icon icon="mdi:trash" height="15" width="15" class="ml-2 cursor-pointer" @click="deletePlayer(player.id)"></Icon>
+                </div>
               </div>
             </div>
           </div>
-          <div class="w-[25%] min-w-[300px] h-[calc(100%-50px)] border rounded-lg border-gray-300 flex flex-col items-center bg-white">
-            <div class="flex items-center">
-              <p class="text-center pt-[5px] text-[18px] font-semibold mr-[5px]">BALLOTTAGGI</p>
-              <el-button type="warning" size="small" circle class="mt-[3px]" @click="openModal('bal', ts.id)">
-                <Icon icon="mdi:plus" height="18"></Icon>
-              </el-button>
-            </div>
-            <div class="flex items-center justify-between rounded border border-gray-200 gap-4 w-[95%] mx-2 mt-2 px-2" v-for="player in playerBal" :key="player.id">
-              <div class="flex items-center">
-                <div class="h-[18px] w-[18px] rounded-full flex justify-center items-center text-[11px] text-white mr-2" :class="[getColor(player.ruolo)]">{{player.ruolo}}</div>
-                {{player.nome}}
-              </div>
-              <div class="flex items-center text-[12px]">
-                xFMV: {{player.xFMV}}
-                xPv: {{player.xPv}}
-                <Icon icon="mdi:trash" height="15" width="15" class="ml-2 cursor-pointer" @click="deletePlayer(player.id)"></Icon>
-              </div>
-            </div>
-          </div>
         </div>
-      </div>
+      </Transition>
     </div>
     <el-dialog v-model="modal" title="Giocatore">
       <template #default>
@@ -177,5 +179,16 @@ onMounted(async () =>{
 </template>
 
 <style scoped>
-
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.3s ease;
+}
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateX(80px);
+}
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateX(-80px);
+}
 </style>

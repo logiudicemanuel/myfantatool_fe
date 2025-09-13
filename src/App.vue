@@ -6,8 +6,8 @@ const router = useRouter()
 </script>
 
 <template>
-  <div id="fanta-index" class="w-full h-full">
-    <div class="w-full h-[60px] flex items-center justify-between px-4 border-b shadow-sm border-gray-200">
+  <div id="fanta-index" class="w-full h-full bg-gradient-to-r from-[#7c01ff]/20 to-[#30babf]/20 backdrop-blur-sm overflow-x-hidden">
+    <div class="w-full h-[60px] !bg-white flex items-center justify-between px-4 border-b shadow-sm border-gray-200">
       <div class="h-[44px] mt-[-5px] cursor-pointer" @click="router.push({name: 'index'})">
         <img src="../src/assets/icon/logo2.png" alt="logo" />
       </div>
@@ -22,7 +22,9 @@ const router = useRouter()
         </div>
       </div>
     </div>
-    <router-view class="bg-gradient-to-r from-[#7c01ff]/20 to-[#30babf]/20 backdrop-blur-sm"></router-view>
+    <transition name="fade-slide" mode="out-in">
+      <router-view class="overflow-x-hidden"></router-view>
+    </transition>
   </div>
 </template>
 
@@ -37,5 +39,18 @@ body {
 
 #app {
   height: 100%;
+}
+
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.3s ease;
+}
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateX(-80px);
+}
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateX(80px);
 }
 </style>
