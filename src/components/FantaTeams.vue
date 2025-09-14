@@ -142,7 +142,7 @@ onMounted(async () =>{
         </div>
       </Transition>
     </div>
-    <el-dialog v-model="modal" title="Giocatore">
+    <el-dialog v-model="modal" title="Giocatore" width="400">
       <template #default>
         <div>
           <el-form :model="playerForm" label-width="auto" style="max-width: 600px">

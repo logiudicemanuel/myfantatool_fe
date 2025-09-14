@@ -27,6 +27,11 @@ export async function savePlayer(data:object) {
   const res = await api.post('/items/giocatore', data);
   return res.data.data;
 }
+export async function saveAstaPlayer(data:object) {
+  if (!loggedIn.value) throw new Error('Non sei loggato');
+  const res = await api.post('/items/giocatoreasta', data);
+  return res.data.data;
+}
 export async function getGiocatoriTitolari(sq: number) {
   if (!loggedIn.value) throw new Error('Non sei loggato');
   const res = await api.get(`/items/giocatore?filter[squadra][_eq]=${sq}&filter[impiego][_eq]=tit`);
@@ -37,12 +42,22 @@ export async function getGiocatoriBallottaggio(sq: number) {
   const res = await api.get(`/items/giocatore?filter[squadra][_eq]=${sq}&filter[impiego][_eq]=bal`);
   return res.data.data;
 }
+export async function getGiocatoreAsta(slot: string, ruolo: string) {
+  if (!loggedIn.value) throw new Error('Non sei loggato');
+  const res = await api.get(`/items/giocatoreasta?filter[slot][_eq]=${slot}&filter[ruolo][_eq]=${ruolo}`);
+  return res.data.data;
+}
 export async function deleteGiocatore(id: number) {
   if (!loggedIn.value) throw new Error('Non sei loggato');
   const res = await api.delete(`/items/giocatore/${id}`);
   return res.data.data;
 }
+export async function deleteGiocatoreAsta(id: number) {
+  if (!loggedIn.value) throw new Error('Non sei loggato');
+  const res = await api.delete(`/items/giocatoreasta/${id}`);
+  return res.data.data;
+}
 
 export default function useDirectus() {
-  return { login, getSquadre, savePlayer, getGiocatoriTitolari, getGiocatoriBallottaggio, deleteGiocatore, token, loggedIn };
+  return { login, getSquadre, savePlayer, getGiocatoriTitolari, getGiocatoriBallottaggio, deleteGiocatore, getGiocatoreAsta, saveAstaPlayer, deleteGiocatoreAsta, token, loggedIn };
 }
