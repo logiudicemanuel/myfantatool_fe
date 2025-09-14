@@ -2,10 +2,31 @@
 import { Icon } from '@iconify/vue'
 import { useBudgetStore } from '@/stores/budget.ts'
 import { ref } from 'vue'
-import { deleteGiocatoreAsta, getGiocatoreAsta, saveAstaPlayer } from '@/composable/useDirectus.ts'
+import {
+  deleteGiocatoreAsta,
+  getGiocatoreAsta,
+  saveAstaPlayer,
+  updateAstaPlayer
+} from '@/composable/useDirectus.ts'
 
 const modal = ref(<boolean>false)
 const br = useBudgetStore()
+
+const budgetCopy = JSON.parse(JSON.stringify(br.budgetReparto))
+
+const subBudget = ref(<object>({
+    'dif': {
+      '1 slot': 0.50,
+      '2 slot': 0.50,
+      '3 slot': 0.50,
+      '4 slot': 0.50,
+      '5 slot': 0.50,
+      '6 slot': 0.50,
+      '7 slot': 0.50,
+      '8 slot': 0.50
+    },
+  }
+))
 
 const primoSlot = ref(<object[]>([{}]))
 const secondoSlot = ref(<object[]>([{}]))
@@ -39,6 +60,15 @@ function openModal(slot: string) {
   playerForm.value.ruolo = ruoloMapping[repartoSelected.value]
   playerForm.value.slot = slot
 }
+const takeModal = ref(<boolean>false)
+const takeModalPlayerForm = ref(<object>({
+  id: '',
+  costo: null,
+}))
+function openTakeModal(id: number){
+  takeModal.value = true
+  takeModalPlayerForm.value.id = id
+}
 async function save(){
   await saveAstaPlayer(playerForm.value)
   modal.value = false
@@ -60,7 +90,21 @@ async function save(){
     slot: null
   }
 }
-async function deletePlayer(id: number, slot: string){
+async function saveTakePlayer(){
+  budgetCopy[repartoSelected.value] -= takeModalPlayerForm.value.costo
+  await updateAstaPlayer(takeModalPlayerForm.value.id, {costo: takeModalPlayerForm.value.costo})
+  takeModal.value = false
+  primoSlot.value = await getGiocatoreAsta('1s', ruoloMapping[repartoSelected.value])
+  secondoSlot.value = await getGiocatoreAsta('2s', ruoloMapping[repartoSelected.value])
+  terzoSlot.value = await getGiocatoreAsta('3s', ruoloMapping[repartoSelected.value])
+  altroSlot.value = await getGiocatoreAsta('altro', ruoloMapping[repartoSelected.value])
+  takeModalPlayerForm.value = {
+    id: '',
+    costo: null,
+  }
+}
+async function deletePlayer(id: number, slot: string, costo: number){
+  budgetCopy[repartoSelected.value] += costo
   await deleteGiocatoreAsta(id)
   if(slot === '1s'){
     primoSlot.value = await getGiocatoreAsta(slot, ruoloMapping[repartoSelected.value])
@@ -78,10 +122,41 @@ async function deletePlayer(id: number, slot: string){
 
 async function selectedReparto(ruolo: Reparto) {
   repartoSelected.value = ruolo
-  primoSlot.value = await getGiocatoreAsta('1s', ruoloMapping[repartoSelected.value])
-  secondoSlot.value = await getGiocatoreAsta('2s', ruoloMapping[repartoSelected.value])
-  terzoSlot.value = await getGiocatoreAsta('3s', ruoloMapping[repartoSelected.value])
-  altroSlot.value = await getGiocatoreAsta('altro', ruoloMapping[repartoSelected.value])
+  budgetCopy[repartoSelected.value] = JSON.parse(JSON.stringify(br.budgetReparto[repartoSelected.value]))
+  await Promise.all([getGiocatoreAsta('1s', ruoloMapping[repartoSelected.value]), getGiocatoreAsta('2s', ruoloMapping[repartoSelected.value]), getGiocatoreAsta('3s', ruoloMapping[repartoSelected.value]), getGiocatoreAsta('altro', ruoloMapping[repartoSelected.value])]).then(response => {
+    primoSlot.value = response[0]
+    secondoSlot.value = response[1]
+    terzoSlot.value = response[2]
+    altroSlot.value = response[3]
+    if(ruolo === 'dif'){
+      budgetCopy[repartoSelected.value] += budgetCopy['por']
+    } else if(ruolo === 'cen'){
+      budgetCopy[repartoSelected.value] += budgetCopy['dif']
+    } else if(ruolo === 'att'){
+      budgetCopy[repartoSelected.value] += budgetCopy['cen']
+    }
+    for(const player of primoSlot.value){
+      console.log(player.costo)
+      if(player.costo){
+        budgetCopy[repartoSelected.value] -= player.costo
+      }
+    }
+    for(const player of secondoSlot.value){
+      if(player.costo){
+        budgetCopy[repartoSelected.value] -= player.costo
+      }
+    }
+    for(const player of terzoSlot.value){
+      if(player.costo){
+        budgetCopy[repartoSelected.value] -= player.costo
+      }
+    }
+    for(const player of altroSlot.value){
+      if(player.costo){
+        budgetCopy[repartoSelected.value] -= player.costo
+      }
+    }
+  })
 }
 </script>
 
@@ -127,8 +202,8 @@ async function selectedReparto(ruolo: Reparto) {
             </div>
           </div>
           <div class="w-[80%] p-4 flex flex-col">
-            <p class="text-[16px] font-semibold">Reparti</p>
-            <div class="w-full flex items-center">
+            <p class="text-[16px] font-semibold">Reparti (Totale rimanente: {{budgetCopy['por'] + budgetCopy['dif'] + budgetCopy['cen'] + budgetCopy['att']}})</p>
+            <div class="w-full flex items-start mt-3">
               <div class="w-[15%] flex flex-col gap-2">
                 <div class="w-full flex justify-center items-center rounded-lg min-h-[50px] bg-gradient-to-r from-[#7c01ff]/20 to-[#30babf]/20 backdrop-blur-sm border-3 cursor-pointer" :class="getBorderColor(ruoloMapping[key])" v-for="(rep, key) in br.budgetReparto" :key="key" @click="selectedReparto(key)">
                   <p class="italic font-semibold">{{ key === 'por' ? 'PORTIERI' : key === 'dif' ? 'DIFENSORI' : key === 'cen' ? 'CENTROCAMPISTI' : 'ATTACCANTI'}}</p>
@@ -144,7 +219,9 @@ async function selectedReparto(ruolo: Reparto) {
                   </div>
                   <div class="border flex items-center justify-between rounded-lg border-gray-200 mx-1 mt-1" v-for="player in primoSlot" :key="player.id">
                     <p class="px-2">{{player.nome}}</p>
-                    <Icon icon="mdi:trash" height="15" width="15" class="mr-2 cursor-pointer" @click="deletePlayer(player.id, player.slot)"></Icon>
+                    <el-button v-if="!player.costo" size="small" class="!h-[18px]" @click="openTakeModal(player.id)">Preso?</el-button>
+                    <div v-else>{{player.costo}}</div>
+                    <Icon icon="mdi:trash" height="15" width="15" class="mr-2 cursor-pointer" @click="deletePlayer(player.id, player.slot, player.costo)"></Icon>
                   </div>
                 </div>
                 <div class="w-[20%] h-full border border-gray-200">
@@ -173,7 +250,12 @@ async function selectedReparto(ruolo: Reparto) {
                 </div>
                 <div class="w-[20%] h-full border border-gray-200">
                   <div class="bg-purple-200 text-center font-semibold">BUDGET SLOT</div>
-                  <div>Totale reparto: {{ br.budgetReparto[repartoSelected] }}</div>
+                  <div>Totale rimanente: {{ budgetCopy[repartoSelected] }}</div>
+                  <div v-if="repartoSelected !== 'por'">
+                    <div class="flex items-center" v-for="(val,key) in subBudget[repartoSelected]" :key="key">
+                      <p class="mr-2">{{key}}:</p>{{(budgetCopy[repartoSelected] * val).toFixed(0)}}cr
+                    </div>
+                  </div>
                 </div>
               </div>
               <div v-else class="w-[85%] h-full flex items-center justify-center px-4 italic text-gray-400">
@@ -183,10 +265,11 @@ async function selectedReparto(ruolo: Reparto) {
           </div>
         </div>
       </div>
-      <div class="w-[95%] rounded-full bg-white flex flex-col items-center text-gray-700">
+      <div class="w-[95%] min-h-[300px] rounded-lg bg-white flex flex-col items-center text-gray-700">
         <div class="text-[20px] flex items-center justify-center pt-[5px] font-semibold">
           Situazione Rose
         </div>
+        <div class="italic font-semibold text-[24px]">Cooming soon...</div>
       </div>
     </div>
     <el-dialog v-model="modal" title="Giocatore" width="400">
@@ -203,6 +286,23 @@ async function selectedReparto(ruolo: Reparto) {
         <div class="flex items-center justify-end">
           <el-button @click="modal = false">Annulla</el-button>
           <el-button type="primary" @click="save">Salva</el-button>
+        </div>
+      </template>
+    </el-dialog>
+    <el-dialog v-model="takeModal" title="Costo" width="400">
+      <template #default>
+        <div>
+          <el-form :model="takeModalPlayerForm" label-width="auto" style="max-width: 600px">
+            <el-form-item label="Nome">
+              <el-input type="number" v-model="takeModalPlayerForm.costo"></el-input>
+            </el-form-item>
+          </el-form>
+        </div>
+      </template>
+      <template #footer>
+        <div class="flex items-center justify-end">
+          <el-button @click="takeModal = false">Annulla</el-button>
+          <el-button type="primary" @click="saveTakePlayer">Salva</el-button>
         </div>
       </template>
     </el-dialog>

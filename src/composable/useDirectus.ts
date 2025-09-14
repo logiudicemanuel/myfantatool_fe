@@ -32,6 +32,11 @@ export async function saveAstaPlayer(data:object) {
   const res = await api.post('/items/giocatoreasta', data);
   return res.data.data;
 }
+export async function updateAstaPlayer(id:number, data:object) {
+  if (!loggedIn.value) throw new Error('Non sei loggato');
+  const res = await api.patch(`/items/giocatoreasta/${id}`, data);
+  return res.data.data;
+}
 export async function getGiocatoriTitolari(sq: number) {
   if (!loggedIn.value) throw new Error('Non sei loggato');
   const res = await api.get(`/items/giocatore?filter[squadra][_eq]=${sq}&filter[impiego][_eq]=tit`);
@@ -59,5 +64,5 @@ export async function deleteGiocatoreAsta(id: number) {
 }
 
 export default function useDirectus() {
-  return { login, getSquadre, savePlayer, getGiocatoriTitolari, getGiocatoriBallottaggio, deleteGiocatore, getGiocatoreAsta, saveAstaPlayer, deleteGiocatoreAsta, token, loggedIn };
+  return { login, getSquadre, savePlayer, getGiocatoriTitolari, getGiocatoriBallottaggio, deleteGiocatore, getGiocatoreAsta, saveAstaPlayer, deleteGiocatoreAsta, updateAstaPlayer, token, loggedIn };
 }
